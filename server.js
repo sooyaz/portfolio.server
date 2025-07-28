@@ -10,6 +10,8 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 // 인증 라우트 임포트
 const authRoutes = require('./routes/authRoutes');
+// 게시물 라우트 임포트
+const postRoutes = require('./routes/postRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 9999;
@@ -21,6 +23,8 @@ app.use(cors()); // 모든 도메인에서의 요청을 허용 (개발용)
 
 app.use('/api/auth', authRoutes); // /api/auth/login, /api/auth/refresh 등
 app.use('/api/users', userRoutes);
+
+app.use('/api/post', postRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
