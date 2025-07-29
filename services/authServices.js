@@ -10,7 +10,7 @@ const saltRounds = 10; // bcrypt 해싱에 사용할 라운드 수
  * @returns {Promise<boolean>} - 중복 여부
  */
 const checkDuplicateService = async (type, value) => {
-  const query = type === "ID" ? 'SELECT * FROM `vellod`.`tb_member` WHERE `user_id` = ?' : 'SELECT * FROM `vellod`.`tb_member` WHERE `user_name` = ?';
+  const query = `SELECT * FROM \`${process.env.DB_NAME}\`.\`tb_members\` WHERE \`${type === "ID" ? 'user_id' : 'user_name'}\` = ?`;
   const params = [value];
   const [rows] = await db.query(query, params);
   return rows.length > 0;
@@ -25,12 +25,12 @@ const checkDuplicateService = async (type, value) => {
  * @throws {Error} - 데이터베이스 쿼리 실패 시 에러
  * @return {Promise<void>} - 등록 성공 여부
  */ 
-const registerService = async (userData) => {
+const signUpService = async (userData) => {
   const { userID, userPW, userName, userMail } = userData;
   const hashedPassword = await bcrypt.hash(userPW, saltRounds);
 
-  const query = `INSERT INTO \`vellod\`.\`tb_member\` (\`user_id\`, \`user_name\`, \`user_password\`, \`user_email\`)
-                 VALUES (${userID}, ${userName}, ${hashedPassword}, ${userMail})`;
+  const query = `INSERT INTO \`${process.env.DB_NAME}\`.\`tb_members\` (\`user_id\`, \`user_name\`, \`user_password\`, \`user_email\`)
+                 VALUES ('${userID}', '${userName}', '${hashedPassword}', '${userMail}')`;
 
   await db.query(query, [userID, userName, hashedPassword, userMail]);
   console.log(`사용자 ${userID} 등록 성공`);
@@ -42,10 +42,11 @@ const registerService = async (userData) => {
  * @throws {Error} - 로그인 실패 시 에러
  */
 const loginService = async (userID, userPW) => {
-  const [rows] = await db.query('SELECT * FROM `vellod`.`tb_member` WHERE `user_id` = ?', [userID]);
+  const query = `SELECT * FROM \`${process.env.DB_NAME}\`.\`tb_members\` WHERE \`user_id\` = ?`
+  const [rows] = await db.query(query, [userID]);
   
   if (rows.length === 0) {
-    throw new Error('사용자를 찾을 수 없습니다.');
+    throw new Error('사용자를 찾을 수 없습니다. 아이디를 확인해 주세요.');
   }
   
   const user = rows[0];
@@ -61,7 +62,7 @@ const loginService = async (userID, userPW) => {
 
 
 const userService = {
-  registerService,
+  signUpService,
   loginService,
   checkDuplicateService
 }

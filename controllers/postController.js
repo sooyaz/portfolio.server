@@ -1,18 +1,22 @@
 const postService = require('../services/postServices');
 
-const getList = async () => {
+const getPosts = async () => {
   
 }
-const writePost = async () => {
+const insertPost = async () => {
 
 }
-const saveAttachments = async () => {
+const insertAttachments = async () => {
   
+}
+const updateViews = async () => {
+
 }
 
 const postController = {
-  getList,
-  writePost,
-  saveAttachments
+  getPosts,
+  insertPost,
+  updateViews,
+  insertAttachments
 }
 module.exports = postController;

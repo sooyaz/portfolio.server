@@ -8,19 +8,21 @@ const Token = require('../models/token');
  * @param {Object} req - 요청 객체
  * @param {Object} res - 응답 객체
  */
-const register = async (req, res, next) => {
+const signUp = async (req, res, next) => {
   try {
     const { userID, userPW, userName, userMail } = req.body;
     if (!userID || !userPW || !userName || !userMail) {
+      console.log("여기서 빠지는거니11111")
       return res.status(400).send({ status: 400, message: '모든 필드를 입력해주세요.' });
     }
     
     const isVerificationPending = await redisClient.exists(`verification:${userMail}`);
     if (isVerificationPending) {
+      console.log("여기서 빠지는거니22222")
       return res.status(400).send({ status: 400, message: '이메일 인증이 완료되지 않았습니다.' });
     }
 
-    await authService.registerService({ userID, userPW, userName, userMail });
+    await authService.signUpService({ userID, userPW, userName, userMail });
     res.status(201).send({ status: 201, message: '회원가입이 완료되었습니다.' });
   } catch (error) {
     console.error('Error in userController.registerUser:', error);
@@ -58,7 +60,7 @@ const login = async (req, res) => {
     // 로그인 성공 시 Redis에 사용자 세션 저장 (예시)
     // await redisClient.set(`session:${userID}`, JSON.stringify(user));
   } catch (error) {
-    console.error('Error in userController.loginUser:', error);
+    console.error('Error in userController.loginUser:123', error.message);
     res.status(401).send({ status: 401, message: error.message });
   }
 }
@@ -103,7 +105,7 @@ const checkDuplicate = async (req, res) => {
 }
 
 const userController = {
-  register,
+  signUp,
   login,
   checkDuplicate
 }
