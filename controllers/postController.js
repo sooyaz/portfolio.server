@@ -1,7 +1,7 @@
 const postService = require('../services/postServices');
 
 const getList = async () => {
-
+  
 }
 const writePost = async () => {
 
