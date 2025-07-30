@@ -6,11 +6,11 @@ const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 class Token {
     static generateAccessToken(userPayload) {
         // 사용자 ID와 username만 포함하여 페이로드 생성 (민감 정보 제외)
-        return jwt.sign({ id: userPayload.id, username: userPayload.username }, ACCESS_SECRET, { expiresIn: '15m' });
+        return jwt.sign({ userID: userPayload.userID, userName: userPayload.userName }, ACCESS_SECRET, { expiresIn: '15m' });
     }
 
     static generateRefreshToken(userPayload) {
-        return jwt.sign({ id: userPayload.id, username: userPayload.username }, REFRESH_SECRET, { expiresIn: '7d' });
+        return jwt.sign({ userID: userPayload.userID, userName: userPayload.userName }, REFRESH_SECRET, { expiresIn: '7d' });
     }
 
     static verifyAccessToken(token) {

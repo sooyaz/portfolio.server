@@ -40,15 +40,22 @@ const login = async (req, res) => {
   try {
     const { userID, userPW } = req.body;
     const user = await authService.loginService(userID, userPW);
-
+console.log("dho", user)
     const accessToken = Token.generateAccessToken(user);
     const refreshToken = Token.generateRefreshToken(user);
 
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: false,
+      httpOnly: true,
+      secure: false,
       // secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
       sameSite: 'Lax', // 또는 'Strict'
+    });
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true, // 클라이언트 JS에서 접근 불가 (보안 중요)
+      secure: false,   // HTTPS에서만 동작
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 15, // 15분
     });
     // 액세스 토큰은 응답 본문에 담아 클라이언트에 전송
     res.status(200).send({ status: 200, message: '로그인 성공', data: user, accessToken });

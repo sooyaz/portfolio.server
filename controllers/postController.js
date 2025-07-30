@@ -1,7 +1,7 @@
 const postService = require('../services/postServices');
 
 const getPosts = async () => {
-  
+  console.log("여기 들오나")
 }
 const insertPost = async () => {
 

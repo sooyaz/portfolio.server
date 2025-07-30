@@ -17,7 +17,10 @@ const PORT = process.env.PORT || 9999;
 // JSON 데이터 파싱 및 CORS 설정
 app.use(express.json()); // JSON 형식의 요청 본문을 파싱
 app.use(cookieParser());
-app.use(cors()); // 모든 도메인에서의 요청을 허용 (개발용)
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+})); // 모든 도메인에서의 요청을 허용 (개발용)
 
 app.use('/api/auth', authRoutes);
 // 게시판 게시글 관련 API
