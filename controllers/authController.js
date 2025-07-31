@@ -12,13 +12,11 @@ const signUp = async (req, res, next) => {
   try {
     const { userID, userPW, userName, userMail } = req.body;
     if (!userID || !userPW || !userName || !userMail) {
-      console.log("여기서 빠지는거니11111")
       return res.status(400).send({ status: 400, message: '모든 필드를 입력해주세요.' });
     }
     
     const isVerificationPending = await redisClient.exists(`verification:${userMail}`);
     if (isVerificationPending) {
-      console.log("여기서 빠지는거니22222")
       return res.status(400).send({ status: 400, message: '이메일 인증이 완료되지 않았습니다.' });
     }
 
@@ -40,7 +38,6 @@ const login = async (req, res) => {
   try {
     const { userID, userPW } = req.body;
     const user = await authService.loginService(userID, userPW);
-console.log("dho", user)
     const accessToken = Token.generateAccessToken(user);
     const refreshToken = Token.generateRefreshToken(user);
 
