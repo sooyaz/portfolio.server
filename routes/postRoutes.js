@@ -4,10 +4,14 @@ const router = express.Router(); // Express 라우터 인스턴스 생성
 
 const postController = require('../controllers/postController'); // 컨트롤러 임포트
 
+//게시물 상세 페이지 가져오기
+router.get('/get-post/:id', postController.getPost);
 //전체 게시물 갯수 가져오기
 router.get('/get-posts-count', postController.getPostsCount);
 // 게시물 목록 가져오기
 router.get('/get-posts', postController.getPosts);
+// 게시물 조회수 증가
+router.post('/increment-views/:id', postController.updateViews);
 // 게시물 작성
 router.post('/insert-post', postController.insertPost);
 // 첨부파일 저장

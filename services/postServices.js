@@ -1,6 +1,35 @@
 // services/postService.js
 const db = require('../config/db');
 
+const getPost = async (id) => {
+  const query = `SELECT 
+                        P.id
+                        , C.category_name AS category
+                        , M.user_name AS auth
+                        , p.title
+                        , p.content
+                        , p.views
+                        , p.thumbnail_url
+                        , p.created_dt
+                 FROM ${process.env.DB_NAME}.tb_posts AS P
+                 JOIN ${process.env.DB_NAME}.tb_members AS M ON P.user_id = M.user_id
+                 LEFT JOIN ${process.env.DB_NAME}.tb_categories AS C ON P.category_id = C.category_id
+                 WHERE P.id = ${id}
+                `;
+  try{
+    const [rows] = await db.execute(query);
+    if(rows.length < 1){
+      throw new Error('해당하는 게시물이 존재하지 않습니다.');
+    }
+    const list = rows[0];
+    console.log("목록 확인해보자", rows);
+    return list;
+  }catch(err){
+    console.log("ERROR: ", err);
+    throw new Error('게시물 조회에 실패했습니다.');
+  }
+}
+
 const getPosts = async (page, limit) => {
   const offset = (page - 1) * limit;
   const query = `SELECT 
@@ -18,6 +47,7 @@ const getPosts = async (page, limit) => {
                  ORDER BY P.created_dt DESC
                  LIMIT ${limit} OFFSET ${offset}
                 `;
+    console.log("목록 확인해보자", query);
   try{
     const [rows] = await db.execute(query);
     const list = rows.map(row=>({
@@ -29,7 +59,7 @@ const getPosts = async (page, limit) => {
       views: row.views,
       created_dt: row.created_dt
     }))
-    console.log("목록 확인해보자", list);
+    console.log("목록 확인해보자", rows);
     return list;
   }catch(err){
     console.log("ERROR: ", err);
@@ -73,9 +103,21 @@ const insertPost = async (postData) => {
   // console.log(`사용자 ${userID} 등록 성공`);
 }
 
+const updateViews = async (id) => {
+  const query = `UPDATE ${process.env.DB_NAME}.tb_posts SET views = views + 1 WHERE id = ${id}`;
+  try{
+    await db.execute(query);
+  }catch(err){
+    console.log("ERROR: ", err);
+    throw new Error('게시물 조회에 실패했습니다.');
+  }
+}
+
 const postService = {
+  getPost,
   getPosts,
   getPostsCount,
+  updateViews,
   insertPost
 }
 module.exports = postService;

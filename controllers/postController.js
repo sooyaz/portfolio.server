@@ -1,5 +1,22 @@
 const postService = require('../services/postServices');
 
+const getPost = async (req, res) => {
+  const id = parseInt(req.params.id || '1', 10);
+  try {
+    const post = await postService.getPost(id);
+
+    res.status(201).json({
+      post: post,
+      message:"게시물이 정상적으로 조회되었습니다."
+    })
+  } catch(err) {
+    console.error("게시물 조회 실패:", err);
+    res.status(500).json({
+      message: "게시물 조회에 실패했습니다."
+    })
+  }
+}
+
 const getPosts = async (req, res) => {
   const page = parseInt(req.query.page || '1', 10);
   const limit = parseInt(req.query.limit || '10', 10);
@@ -18,6 +35,17 @@ const getPosts = async (req, res) => {
     res.status(500).json({
       message: "현제 페이지 게시물 조회에 실패했습니다."
     })
+  }
+}
+const updateViews = async (req, res) => {
+  const id = parseInt(req.params.id || '1', 10);
+  
+  try {
+    await postService.updateViews(id);
+    res.status(200).json({ message: '조회수가 성공적으로 업데이트되었습니다.' });
+  } catch (err) {
+    console.error('조회수 업데이트 중 오류 발생:', err);
+    res.status(500).json({ message: '조회수 업데이트 중 서버 오류가 발생했습니다.' });
   }
 }
 
@@ -53,11 +81,9 @@ const insertPost = async (req, res) => {
 const insertAttachments = async () => {
   
 }
-const updateViews = async () => {
-
-}
 
 const postController = {
+  getPost,
   getPosts,
   getPostsCount,
   insertPost,
