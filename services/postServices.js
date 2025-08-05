@@ -1,8 +1,9 @@
 // services/postService.js
 const db = require('../config/db');
+const bcrypt = require('bcrypt'); // 비밀번호 해싱 라이브러리 (필요시)
 
-const getPost = async (id) => {
-  const query = `SELECT 
+const getPost = async (type, id) => {
+  let query = `SELECT 
                         P.id
                         , C.category_name AS category
                         , M.user_name AS auth
@@ -16,6 +17,22 @@ const getPost = async (id) => {
                  LEFT JOIN ${process.env.DB_NAME}.tb_categories AS C ON P.category_id = C.category_id
                  WHERE P.id = ${id}
                 `;
+  if(type == 2){
+      query = `SELECT 
+                        P.id
+                        , C.category_name AS category
+                        , P.user_id AS auth
+                        , P.title
+                        , P.content
+                        , P.views
+                        , P.thumbnail_url
+                        , P.created_dt
+                 FROM ${process.env.DB_NAME}.tb_posts AS P
+                 LEFT JOIN ${process.env.DB_NAME}.tb_categories AS C ON P.category_id = C.category_id
+                 WHERE P.board_type_id=${type}
+                 AND P.id = ${id}
+                 `;
+  }
   try{
     const [rows] = await db.execute(query);
     if(rows.length < 1){
@@ -30,9 +47,9 @@ const getPost = async (id) => {
   }
 }
 
-const getPosts = async (page, limit) => {
+const getPosts = async (type, page, limit) => {
   const offset = (page - 1) * limit;
-  const query = `SELECT 
+  let query = `SELECT 
                         P.id
                         , C.category_name AS category
                         , M.user_name AS auth
@@ -44,9 +61,27 @@ const getPosts = async (page, limit) => {
                  FROM ${process.env.DB_NAME}.tb_posts AS P
                  JOIN ${process.env.DB_NAME}.tb_members AS M ON P.user_id = M.user_id
                  LEFT JOIN ${process.env.DB_NAME}.tb_categories AS C ON P.category_id = C.category_id
+                 WHERE P.board_type_id=${type}
                  ORDER BY P.created_dt DESC
                  LIMIT ${limit} OFFSET ${offset}
                 `;
+    if(type == 2){
+      query = `SELECT 
+                        P.id
+                        , C.category_name AS category
+                        , P.user_id AS auth
+                        , P.title
+                        , P.content
+                        , P.views
+                        , P.thumbnail_url
+                        , P.created_dt
+                 FROM ${process.env.DB_NAME}.tb_posts AS P
+                 LEFT JOIN ${process.env.DB_NAME}.tb_categories AS C ON P.category_id = C.category_id
+                 WHERE P.board_type_id=${type}
+                 ORDER BY P.created_dt DESC
+                 LIMIT ${limit} OFFSET ${offset}
+                 `;
+    }
     console.log("목록 확인해보자", query);
   try{
     const [rows] = await db.execute(query);
@@ -67,8 +102,8 @@ const getPosts = async (page, limit) => {
   }
 }
 
-const getPostsCount = async () => {
-  const query = `SELECT COUNT(*) AS totalCount FROM \`${process.env.DB_NAME}\`.\`tb_posts\``;
+const getPostsCount = async (type) => {
+  const query = `SELECT COUNT(*) AS totalCount FROM ${process.env.DB_NAME}.tb_posts WHERE board_type_id=${type}`;
   try{
     const [rows] = await db.execute(query);
     const resultCount = rows[0].totalCount;
@@ -80,13 +115,16 @@ const getPostsCount = async () => {
 }
 
 const insertPost = async (postData) => {
-  const { userID, title, content, boardType, category } = postData;
-  const query = `INSERT INTO \`${process.env.DB_NAME}\`.\`tb_posts\` (\`user_id\`, \`title\`, \`content\`, \`board_type_id\`, \`category_id\`)
-                 VALUES (?, ?, ?, ?, ?)`;
+  const { userID, askPW, title, content, boardType, category } = postData;
+  const hashedPassword = askPW == null ? null : await bcrypt.hash(askPW, parseInt(process.env.PASSWORD_HASING_ROUND));
+  const query = `INSERT INTO ${process.env.DB_NAME}.tb_posts
+                 (user_id, ask_pw, title, content, board_type_id, category_id)
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+
   // const query = `SELECT * FROM \`${process.env.DB_NAME}\`.\`tb_members\``;
-  console.log("잘 저장 되었나", userID, title, content, boardType, category, query);
+  console.log("잘 저장 되었나", userID, hashedPassword, title, content, boardType, category, query);
   try {
-    const [rows] = await db.execute(query, [userID, title, content, boardType, category]);
+    const [rows] = await db.execute(query, [userID, hashedPassword, title, content, boardType, category]);
     console.log("잘 저장 되었나", rows);
 
   } catch(err) {

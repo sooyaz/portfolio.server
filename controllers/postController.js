@@ -2,8 +2,9 @@ const postService = require('../services/postServices');
 
 const getPost = async (req, res) => {
   const id = parseInt(req.params.id || '1', 10);
+  const boardType = parseInt(req.params.boardType || '1', 10);
   try {
-    const post = await postService.getPost(id);
+    const post = await postService.getPost(boardType, id);
 
     res.status(201).json({
       post: post,
@@ -18,12 +19,13 @@ const getPost = async (req, res) => {
 }
 
 const getPosts = async (req, res) => {
+  const type = parseInt(req.query.boardType || '1', 10);
   const page = parseInt(req.query.page || '1', 10);
   const limit = parseInt(req.query.limit || '10', 10);
 
   try {
-    const postCounts = await postService.getPostsCount();
-    const posts = await postService.getPosts(page, limit);
+    const postCounts = await postService.getPostsCount(type);
+    const posts = await postService.getPosts(type, page, limit);
 
     res.status(201).json({
       totalCount: postCounts,
@@ -67,7 +69,6 @@ const insertPost = async (req, res) => {
   const postData = req.body;
   try {
     const newPost = await postService.insertPost(postData);
-    console.log("@@@", newPost)
     res.status(201).json({
       message:"게시물이 성공적으로 작성되었습니다."
     })
